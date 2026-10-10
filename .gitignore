@@ -23,8 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Storybook
 *storybook.log
 storybook-static
+coverage
 
-# Local machine config
-.claude/settings.local.json
+# Env
+.env
+.env.local

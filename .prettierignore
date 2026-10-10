@@ -8,3 +8,4 @@ skills
 .claude/skills
 storybook-static
 coverage
+.env*
