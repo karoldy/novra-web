@@ -3,3 +3,8 @@ dist
 .pnpm-store
 .husky/_
 pnpm-lock.yaml
+skills
+.agents/skills
+.claude/skills
+storybook-static
+coverage
