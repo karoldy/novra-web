@@ -31,6 +31,7 @@ src/
 ├── components/ui/    # shadcn components (generated, see below)
 ├── lib/utils.ts      # `cn`, configured with the custom typography sizes
 ├── tokens/           # design tokens (typography variant names)
+├── i18n/             # i18next setup + resources/{sc,tc,en}.ts
 ├── index.css         # Tailwind entry + shadcn theme variables (light/dark)
 ├── App.tsx
 └── main.tsx
@@ -88,12 +89,22 @@ components.json       # shadcn CLI config
   - These are vendored upstream files: don't edit them. Update with `npx skills update`. They are excluded from Prettier and ESLint.
 - **MCP** (`.mcp.json`): the `shadcn` server lets agents browse, search and view registry items. Set up with `pnpm dlx shadcn@latest mcp init --client claude`.
 
+## i18n
+
+- `i18next` + `react-i18next`, set up in `src/i18n/index.ts` (imported by `src/main.tsx` and `.storybook/preview.tsx`).
+- Locales (`SUPPORTED_LOCALES`): `sc` (Simplified Chinese, **`DEFAULT_LOCALE`**), `tc` (Traditional Chinese), `en`. The user's choice is saved in `localStorage` (`LOCALE_STORAGE_KEY` = `locale`) and restored on load; if storage is unavailable it falls back to the default.
+- Strings live in `src/i18n/resources/{sc,tc,en}.ts` as nested objects grouped by feature (`app.title`, `locale.label`). `sc` is the source: its shape is `TranslationResource`, which types `t()` keys (`src/i18n/i18next.d.ts`) and the other locales (`export const tc: TranslationResource`), so a missing, extra or misspelled key fails `tsc`.
+- Use `const { t } = useTranslation()`; no hard-coded UI text in components.
+- `<html lang>` follows the locale via `applyDocumentLang` (`sc` → `zh-CN`, `tc` → `zh-Hant`, `en` → `en`). `src/index.css` uses `:lang()` to put the matching CJK font first: SC and TC share code points but draw many characters differently. For mixed content, mark the snippet with `lang="zh-CN"` / `lang="zh-Hant"`.
+- Storybook has a language switcher in the toolbar; pin a story with `globals: { locale: 'tc' }`.
+
 ## Storybook
 
 - Storybook 10 with `@storybook/react-vite`; addons: `addon-docs`, `addon-a11y`. Config in `.storybook/`.
 - It reuses `vite.config.ts` (Tailwind plugin, `@/` alias). `.storybook/preview.tsx` imports `src/index.css` so theme tokens apply.
 - Stories live in `src/stories/` (e.g. `src/stories/button.stories.tsx`) and import components via the `@/` alias. Use CSF3 with `satisfies Meta<typeof Component>`.
 - Story titles: `UI/<Name>` for `src/components/ui`, otherwise mirror the folder.
+- Stories are centered by default (`layout: 'centered'` in `.storybook/preview.tsx`). Use `parameters: { layout: 'fullscreen' }` for page-level stories (layouts, headers, sidebars).
 - Check the a11y panel for new components; fix violations rather than disabling rules.
 
 ### Component Tests
