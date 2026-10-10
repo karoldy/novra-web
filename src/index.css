@@ -1,13 +1,120 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/geist';
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Typography — AA Library Figma spec. 1rem = 16px, line-height 120%, letter-spacing 0.
+ * Keep in sync with src/tokens/typography.ts.
+ */
+@theme {
+  /* Heading / Subtitle */
+  --text-heading1: 2.25rem;
+  --text-heading1--line-height: 1.2;
+  --text-heading1--letter-spacing: 0;
+  --text-heading1--font-weight: 600;
+  --text-heading2: 2rem;
+  --text-heading2--line-height: 1.2;
+  --text-heading2--letter-spacing: 0;
+  --text-heading2--font-weight: 600;
+  --text-subtitle1: 1.75rem;
+  --text-subtitle1--line-height: 1.2;
+  --text-subtitle1--letter-spacing: 0;
+  --text-subtitle1--font-weight: 600;
+  --text-subtitle2: 1.5rem;
+  --text-subtitle2--line-height: 1.2;
+  --text-subtitle2--letter-spacing: 0;
+  --text-subtitle2--font-weight: 600;
+  --text-subtitle3: 1.25rem;
+  --text-subtitle3--line-height: 1.2;
+  --text-subtitle3--letter-spacing: 0;
+  --text-subtitle3--font-weight: 600;
+
+  /* Body */
+  --text-body1: 1.125rem;
+  --text-body1--line-height: 1.2;
+  --text-body1--letter-spacing: 0;
+  --text-body1--font-weight: 400;
+  --text-body2: 1rem;
+  --text-body2--line-height: 1.2;
+  --text-body2--letter-spacing: 0;
+  --text-body2--font-weight: 400;
+  --text-body3: 0.875rem;
+  --text-body3--line-height: 1.2;
+  --text-body3--letter-spacing: 0;
+  --text-body3--font-weight: 400;
+
+  /* CTA */
+  --text-button1: 1.125rem;
+  --text-button1--line-height: 1.2;
+  --text-button1--letter-spacing: 0;
+  --text-button1--font-weight: 600;
+  --text-button2: 1rem;
+  --text-button2--line-height: 1.2;
+  --text-button2--letter-spacing: 0;
+  --text-button2--font-weight: 600;
+  --text-icon-button: 1.125rem;
+  --text-icon-button--line-height: 1.2;
+  --text-icon-button--letter-spacing: 0;
+  --text-icon-button--font-weight: 600;
+  --text-link: 1.125rem;
+  --text-link--line-height: 1.2;
+  --text-link--letter-spacing: 0;
+  --text-link--font-weight: 600;
+
+  /* Tab */
+  --text-tab-highlight: 1.25rem;
+  --text-tab-highlight--line-height: 1.2;
+  --text-tab-highlight--letter-spacing: 0;
+  --text-tab-highlight--font-weight: 600;
+  --text-tab-default: 1.125rem;
+  --text-tab-default--line-height: 1.2;
+  --text-tab-default--letter-spacing: 0;
+  --text-tab-default--font-weight: 400;
+
+  /* Input field */
+  --text-input-title: 1rem;
+  --text-input-title--line-height: 1.2;
+  --text-input-title--letter-spacing: 0;
+  --text-input-title--font-weight: 400;
+  --text-input-placeholder: 1.125rem;
+  --text-input-placeholder--line-height: 1.2;
+  --text-input-placeholder--letter-spacing: 0;
+  --text-input-placeholder--font-weight: 400;
+
+  /* Label */
+  --text-label1: 1.5rem;
+  --text-label1--line-height: 1.2;
+  --text-label1--letter-spacing: 0;
+  --text-label1--font-weight: 600;
+  --text-label2: 1rem;
+  --text-label2--line-height: 1.2;
+  --text-label2--letter-spacing: 0;
+  --text-label2--font-weight: 600;
+  --text-label3: 1rem;
+  --text-label3--line-height: 1.2;
+  --text-label3--letter-spacing: 0;
+  --text-label3--font-weight: 400;
+
+  /* Number — fixed px, does not scale with root font size */
+  --text-number1: 56px;
+  --text-number1--line-height: 1.2;
+  --text-number1--letter-spacing: 0;
+  --text-number1--font-weight: 700;
+  --text-number2: 48px;
+  --text-number2--line-height: 1.2;
+  --text-number2--letter-spacing: 0;
+  --text-number2--font-weight: 700;
+  --text-number3: 40px;
+  --text-number3--line-height: 1.2;
+  --text-number3--letter-spacing: 0;
+  --text-number3--font-weight: 700;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: 'Noto Sans Variable', 'Noto Sans TC Variable', 'Noto Sans SC Variable', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
