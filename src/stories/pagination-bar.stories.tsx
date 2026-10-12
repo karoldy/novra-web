@@ -4,9 +4,11 @@ import { expect, fn } from 'storybook/test';
 import { PaginationBar } from '@/components/molecules/pagination-bar';
 import { YStack } from '@/components/ui/stack';
 
-function Example({ total }: { total: number }) {
+function Example({ total, label }: { total: number; label?: string }) {
   const [page, setPage] = useState(1);
-  return <PaginationBar page={page} total={total} pageSize={12} onPageChange={setPage} />;
+  return (
+    <PaginationBar page={page} total={total} pageSize={12} onPageChange={setPage} label={label} />
+  );
 }
 
 const meta = {
@@ -28,16 +30,17 @@ export const Scenarios: Story = {
   render: () => (
     <YStack className="w-full gap-10">
       <Example total={0} />
-      <Example total={60} />
-      <Example total={120} />
+      <Example total={60} label="60 項分頁" />
+      <Example total={120} label="120 項分頁" />
     </YStack>
   ),
   play: async ({ canvas }) => {
     await expect(canvas.getByText('第 1 頁，共 1 頁（顯示第0項內的 0 項）')).toBeVisible();
     await expect(canvas.getByText('第 1 頁，共 5 頁（顯示第60項內的 1–12 項）')).toBeVisible();
     await expect(canvas.getByText('第 1 頁，共 10 頁（顯示第120項內的 1–12 項）')).toBeVisible();
-    // Only 1 page → no navigation; the other two have one each.
-    await expect(canvas.getAllByRole('navigation', { name: '分頁' })).toHaveLength(2);
+    // Only 1 page → no navigation; the other two have one each, with distinct names.
+    await expect(canvas.getByRole('navigation', { name: '60 項分頁' })).toBeVisible();
+    await expect(canvas.getByRole('navigation', { name: '120 項分頁' })).toBeVisible();
     await expect(canvas.getAllByRole('button', { name: '顯示12項' })).toHaveLength(3);
   },
 };

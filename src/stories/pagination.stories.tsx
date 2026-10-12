@@ -61,6 +61,7 @@ export const Links: Story = {
     await expect(current).not.toHaveAttribute('role');
     const previous = canvas.getByLabelText('Previous page');
     await expect(previous).not.toHaveAttribute('href');
+    await expect(previous).toHaveAttribute('role', 'link');
     await expect(previous).toHaveAttribute('aria-disabled', 'true');
   },
 };

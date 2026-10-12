@@ -24,6 +24,8 @@ type PaginationBarProps = Omit<ComponentProps<'div'>, 'children'> & {
   /** Items per page. */
   pageSize: number;
   onPageChange: (page: number) => void;
+  /** Landmark name. Set this when more than one bar is on the page. */
+  label?: string;
 };
 
 /**
@@ -36,6 +38,7 @@ function PaginationBar({
   total,
   pageSize,
   onPageChange,
+  label,
   className,
   ...props
 }: PaginationBarProps) {
@@ -75,7 +78,7 @@ function PaginationBar({
         </FilterChip>
       </XStack>
       {pageCount > 1 && (
-        <Pagination aria-label={t('pagination.label')}>
+        <Pagination aria-label={label ?? t('pagination.label')}>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious

@@ -85,11 +85,13 @@ function PaginationLink({ isActive = false, className, ...props }: PaginationLin
     return (
       <a
         {...shared}
-        // A disabled link has no href: not focusable, not followable.
+        {...anchorProps}
+        // No href: not followable. Keep role="link" so the accessible name stays valid
+        // on an <a> that would otherwise have no role.
         href={disabled ? undefined : href}
         aria-disabled={disabled || undefined}
         data-disabled={disabled || undefined}
-        {...anchorProps}
+        {...(disabled ? { role: 'link' as const, tabIndex: -1 } : {})}
       />
     );
   }
