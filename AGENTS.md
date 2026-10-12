@@ -28,7 +28,10 @@ pnpm test:watch       # Vitest watch mode
 
 ```
 src/
-├── components/ui/    # shadcn components (generated, see below)
+├── components/
+│   ├── ui/           # atoms: shadcn components + base primitives (Button, Typography, Stack)
+│   ├── molecules/    # small compositions of atoms (Logo)
+│   └── organisms/    # larger sections built from molecules/atoms (headers, sidebars, forms)
 ├── lib/utils.ts      # `cn`, configured with the custom typography sizes
 ├── tokens/           # design tokens (typography variant names)
 ├── i18n/             # i18next setup + resources/{sc,tc,en}.ts
@@ -61,9 +64,25 @@ components.json       # shadcn CLI config
 - Fonts: Noto Sans (Latin), Noto Sans TC, Noto Sans SC — self-hosted Fontsource variable fonts loaded by `unplugin-fonts` (`Unfonts` in `vite.config.ts`, `import 'unfonts.css'` in `src/main.tsx` and `.storybook/preview.tsx`). The `--font-sans` stack in `src/styles/fonts.css` sets the fallback order. To add a font, install its `@fontsource(-variable)/*` package and list it in `Unfonts`; don't `@import` fonts in CSS. Font files are emitted to `assets/fonts/` and never inlined.
 - Tailwind v4 is configured CSS-first: there is **no `tailwind.config.js`**. Theme tokens and dark mode live in `src/styles/theme.css` (`@theme inline`, `:root`, `.dark`); `src/index.css` only imports. The shadcn CLI writes new CSS variables into `src/index.css` (`components.json` → `tailwind.css`): move them into the matching `src/styles/*.css` file. Use theme colors (`bg-primary`, `text-muted-foreground`, …) rather than hardcoded values.
 
+### Theme Color
+
+- **Primary is #0F1048** (`--primary` in `src/styles/theme.css`). Figma files may show other blues (e.g. AA Library's #094DCC): don't use them, use the theme primary.
+- Interactive states of primary-colored elements use these derived values (same hue, defined as `--button-primary-hover` / `--button-primary-pressed`). Reuse the variables; don't invent new shades.
+
+  | State                      | Light mode                                | Dark mode                 |
+  | -------------------------- | ----------------------------------------- | ------------------------- |
+  | Default                    | `#0F1048` · `oklch(0.2199 0.101 273.57)`  | `oklch(0.82 0.07 273.57)` |
+  | Hover                      | `#1E2368` · `oklch(0.3 0.12 273.57)`      | `oklch(0.76 0.08 273.57)` |
+  | Active / pressed           | `#2A3280` · `oklch(0.36 0.13 273.57)`     | `oklch(0.7 0.09 273.57)`  |
+  | Subtle background, hover   | `#E7ECFF` · `oklch(0.9442 0.0264 273.57)` | same                      |
+  | Subtle background, pressed | `#BCCAFF` · `oklch(0.8457 0.0759 273.57)` | same                      |
+  | Text on subtle backgrounds | `#0F1048`                                 | `#0F1048`                 |
+
+  In light mode hover / pressed get **lighter** (navy can't get darker); in dark mode, where primary is a light tint, they get darker. Text on primary is white (light) / navy (dark): `--primary-foreground`.
+
 ### Brand / Logo
 
-- `src/components/logo.tsx`: `<Logo variant="horizontal" | "vertical">` — the Central Yards logo. Source files: `src/assets/logo/*.svg`, imported as components.
+- `src/components/molecules/logo.tsx`: `<Logo variant="horizontal" | "vertical">` — the Central Yards logo. Source files: `src/assets/logo/*.svg`, imported as components.
 - Color and size come from `className`: shapes use `currentColor`, so set the color with `text-*`; set the size with `h-*` (horizontal, width follows the aspect ratio) or `size-*` (vertical). Defaults: `h-6.5 w-auto` (136×26) and `size-40` (160×160).
 - It has `role="img"` + `aria-label="Central Yards"`; pass `title={null}` when decorative.
 
@@ -80,10 +99,30 @@ components.json       # shadcn CLI config
 
 ### Button
 
-- `src/components/ui/button.tsx` follows the Web Portal Design System (Figma). Only `variant="default"` (navy fill) and `variant="outline"` are designed; `secondary`, `ghost`, `destructive`, `link` and the `icon*` sizes are kept from shadcn because shadcn components use them.
-- Sizes: `lg` = Figma "large" (36px, 12px text), `default` = "Small" (32px, 11px text), `xs` = "Component button" (24px, for use inside other components). `sm` has no Figma counterpart.
-- Icons: put the icon inside with `data-icon="inline-start" | "inline-end"` and no size class (16px by default); the horizontal padding tightens automatically.
-- Colors come from `--button-outline-border`, `--button-outline-foreground`, `--button-disabled`, `--button-disabled-foreground` in `src/styles/theme.css`, not hex values in the component.
+- `src/components/ui/button.tsx` follows the AA Library Figma "Button" set. Variant names are shadcn's (so shadcn components keep working); map them to Figma like this:
+
+  | Figma style      | `variant`             |
+  | ---------------- | --------------------- |
+  | Primary          | `default`             |
+  | Secondary        | `outline`             |
+  | Tertiary         | `ghost`               |
+  | Danger           | `destructive`         |
+  | Danger Secondary | `destructive-outline` |
+
+  `secondary` and `link` are not in Figma; kept for shadcn components.
+
+- Sizes: `default` = Figma "Default" (48px, `button1` text, min width 140), `sm` = "Small" (40px, `button2` text, min width 132). Both are pill-shaped with 24px icons. `lg`, `xs` and `icon*` are shadcn sizes kept for shadcn components.
+- States: hover / pressed / disabled come from CSS. `skeleton` renders Figma's loading placeholder (not interactive, `aria-busy`). `onDark` is Figma's "On White=no": outline / ghost turn white on dark or colored surfaces.
+- Icons: put the icon inside with `data-icon="inline-start" | "inline-end"` and no size class.
+- `loading`: shows a Spinner in place of the leading icon (text stays), ignores clicks, sets `aria-busy`. Unlike `disabled` it keeps its normal colors and stays focusable (`aria-disabled`). Use it instead of composing a Spinner by hand.
+- Colors come from the `--button-*` variables in `src/styles/theme.css`. Primary, hover, pressed and subtle tints follow [Theme Color](#theme-color); danger, disabled and skeleton use the Figma values.
+
+### Spinner
+
+- `src/components/ui/spinner.tsx`: `<Spinner size="sm" | "md" | "lg" />` (16 / 24 / 88px), from the AA Library Figma "Loading". `lg` has no track. Rotates once per 720ms; slower (not stopped) with reduced motion.
+- No text: it is only the indicator. For a message (Figma "Inline"), compose it: `<XStack role="status" align="center" className="gap-2"><Spinner /><span className="text-body2 text-muted-foreground">…</span></XStack>`.
+- Decorative (`aria-hidden`) by default; pass `aria-label` to announce it as `role="status"`.
+- In buttons use `<Button loading>` rather than placing a Spinner yourself; it takes the button's text color. Colors: `--spinner-indicator`, `--spinner-track` in `src/styles/theme.css`.
 
 ### Typography
 
@@ -120,7 +159,7 @@ components.json       # shadcn CLI config
 - Storybook 10 with `@storybook/react-vite`; addons: `addon-docs`, `addon-a11y`. Config in `.storybook/`.
 - It reuses `vite.config.ts` (Tailwind plugin, `@/` alias). `.storybook/preview.tsx` imports `src/index.css` so theme tokens apply.
 - Stories live in `src/stories/` (e.g. `src/stories/button.stories.tsx`) and import components via the `@/` alias. Use CSF3 with `satisfies Meta<typeof Component>`.
-- Story titles: `UI/<Name>` for `src/components/ui`, otherwise mirror the folder.
+- Story titles mirror the component folder: `UI/<Name>` (`components/ui`), `Molecules/<Name>`, `Organisms/<Name>`; non-component stories use `Foundations/<Name>`.
 - Layout inside stories uses `XStack` / `YStack` too, not hand-written `flex` containers.
 - Stories are centered by default (`layout: 'centered'` in `.storybook/preview.tsx`). Use `parameters: { layout: 'fullscreen' }` for page-level stories (layouts, headers, sidebars).
 - Check the a11y panel for new components; fix violations rather than disabling rules.
@@ -167,4 +206,4 @@ This bumps `package.json`, updates `CHANGELOG.md`, commits and tags. It does not
 1. **Keep changes scoped** — only modify files relevant to the task.
 2. **Verify after edits** — run `pnpm exec tsc -b` and `pnpm lint`; run `pnpm build` for config or dependency changes.
 3. **Don't revert unrelated changes** — respect the user's working state.
-4. **Reuse before creating** — check `src/components/ui/` and add shadcn components before building custom ones.
+4. **Reuse before creating** — check `src/components/{ui,molecules,organisms}/` and add shadcn components before building custom ones. Put new components in the lowest layer that fits.
