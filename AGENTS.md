@@ -29,15 +29,16 @@ pnpm test:watch       # Vitest watch mode
 ```
 src/
 ├── components/
-│   ├── ui/           # atoms: shadcn components + base primitives (Button, Typography, Stack)
-│   ├── molecules/    # small compositions of atoms (Logo)
+│   ├── ui/           # atoms: shadcn components + base primitives (Button, Typography, Stack, Spinner, Pagination)
+│   ├── molecules/    # small compositions of atoms (Logo, FilterChip, PaginationBar)
 │   └── organisms/    # larger sections built from molecules/atoms (headers, sidebars, forms)
 ├── lib/utils.ts      # `cn`, configured with the custom typography sizes
 ├── tokens/           # design tokens (typography variant names)
 ├── i18n/             # i18next setup + resources/{sc,tc,en}.ts
 ├── index.css         # CSS entry: Tailwind, shadcn, then @imports src/styles/*
 ├── styles/
-│   ├── theme.css     # shadcn theme: semantic colors (light :root / dark .dark), radius, brand primary
+│   ├── theme.css     # global theme: shadcn semantic colors (light :root / dark .dark), radius, brand primary
+│   ├── component.css # component tokens: --button-*, --spinner-*, --chip* (one section per component)
 │   ├── fonts.css     # --font-sans + :lang() font switching
 │   ├── typography.css # typography @theme (--text-heading1 … number3)
 │   └── base.css      # @layer base globals
@@ -61,8 +62,9 @@ components.json       # shadcn CLI config
 - Class merging uses `cn` from `@/lib/utils` (backed by the official `cn` package, which replaces `clsx` + `tailwind-merge`). Don't add `clsx` or `tailwind-merge`.
 - **Always import `cn` from `@/lib/utils`, never from `'cn'`** — the local one registers the typography sizes; the bare package treats `text-body1` as a color and drops it next to `text-primary`. ESLint enforces this. The shadcn CLI generates `from 'cn'`: change it after `shadcn add`.
 - Icons: `lucide-react`.
+- **`ui/` components don't build in icons or text.** Consumers pass icons as children marked with `data-icon="inline-start" | "inline-end"` (the component only sizes and positions them) and labels as props. (A Button's `loading` Spinner is a state indicator, not an icon.) Molecules / organisms that assemble a fixed pattern may build in their icons (lucide) and labels — labels through i18n, never hard-coded (e.g. `PaginationBar`).
 - Fonts: Noto Sans (Latin), Noto Sans TC, Noto Sans SC — self-hosted Fontsource variable fonts loaded by `unplugin-fonts` (`Unfonts` in `vite.config.ts`, `import 'unfonts.css'` in `src/main.tsx` and `.storybook/preview.tsx`). The `--font-sans` stack in `src/styles/fonts.css` sets the fallback order. To add a font, install its `@fontsource(-variable)/*` package and list it in `Unfonts`; don't `@import` fonts in CSS. Font files are emitted to `assets/fonts/` and never inlined.
-- Tailwind v4 is configured CSS-first: there is **no `tailwind.config.js`**. Theme tokens and dark mode live in `src/styles/theme.css` (`@theme inline`, `:root`, `.dark`); `src/index.css` only imports. The shadcn CLI writes new CSS variables into `src/index.css` (`components.json` → `tailwind.css`): move them into the matching `src/styles/*.css` file. Use theme colors (`bg-primary`, `text-muted-foreground`, …) rather than hardcoded values.
+- Tailwind v4 is configured CSS-first: there is **no `tailwind.config.js`**. Global theme tokens and dark mode live in `src/styles/theme.css` (`@theme inline`, `:root`, `.dark`); variables owned by one component go in `src/styles/component.css`, one section per component with its `@theme inline` mapping, `:root` and `.dark` values. `src/index.css` only imports. The shadcn CLI writes new CSS variables into `src/index.css` (`components.json` → `tailwind.css`): move them into the matching `src/styles/*.css` file. Use theme colors (`bg-primary`, `text-muted-foreground`, …) rather than hardcoded values.
 
 ### Theme Color
 
@@ -112,17 +114,41 @@ components.json       # shadcn CLI config
   `secondary` and `link` are not in Figma; kept for shadcn components.
 
 - Sizes: `default` = Figma "Default" (48px, `button1` text, min width 140), `sm` = "Small" (40px, `button2` text, min width 132). Both are pill-shaped with 24px icons. `lg`, `xs` and `icon*` are shadcn sizes kept for shadcn components.
-- States: hover / pressed / disabled come from CSS. `skeleton` renders Figma's loading placeholder (not interactive, `aria-busy`). `onDark` is Figma's "On White=no": outline / ghost turn white on dark or colored surfaces.
-- Icons: put the icon inside with `data-icon="inline-start" | "inline-end"` and no size class.
-- `loading`: shows a Spinner in place of the leading icon (text stays), ignores clicks, sets `aria-busy`. Unlike `disabled` it keeps its normal colors and stays focusable (`aria-disabled`). Use it instead of composing a Spinner by hand.
-- Colors come from the `--button-*` variables in `src/styles/theme.css`. Primary, hover, pressed and subtle tints follow [Theme Color](#theme-color); danger, disabled and skeleton use the Figma values.
+- States: hover / pressed / disabled come from CSS. `skeleton` renders Figma's loading placeholder (natively disabled, so not focusable or clickable; `aria-busy`). `onDark` is Figma's "On White=no": outline / ghost turn white on dark or colored surfaces.
+- Icons: put the icon inside with `data-icon="inline-start" | "inline-end"` and no size class. Each size sets its own icon size (no base default), so classes never compete when `buttonVariants()` is used without `cn`.
+- `loading`: shows a 16px Spinner (`size="sm"`, on every button size) in place of the leading icon (text stays), ignores clicks, sets `aria-busy`. Unlike `disabled` it keeps its normal colors and stays focusable (`aria-disabled`). Use it instead of composing a Spinner by hand.
+- Colors come from the `--button-*` variables in `src/styles/component.css`. Primary, hover, pressed and subtle tints follow [Theme Color](#theme-color); danger, disabled and skeleton use the Figma values.
 
 ### Spinner
 
 - `src/components/ui/spinner.tsx`: `<Spinner size="sm" | "md" | "lg" />` (16 / 24 / 88px), from the AA Library Figma "Loading". `lg` has no track. Rotates once per 720ms; slower (not stopped) with reduced motion.
 - No text: it is only the indicator. For a message (Figma "Inline"), compose it: `<XStack role="status" align="center" className="gap-2"><Spinner /><span className="text-body2 text-muted-foreground">…</span></XStack>`.
 - Decorative (`aria-hidden`) by default; pass `aria-label` to announce it as `role="status"`.
-- In buttons use `<Button loading>` rather than placing a Spinner yourself; it takes the button's text color. Colors: `--spinner-indicator`, `--spinner-track` in `src/styles/theme.css`.
+- In buttons use `<Button loading>` rather than placing a Spinner yourself; it takes the button's text color. Colors: `--spinner-indicator`, `--spinner-track` in `src/styles/component.css`.
+
+### FilterChip
+
+- `src/components/molecules/filter-chip.tsx`, from the AA Library Figma "Chips/Filter" (40px high, 4px radius). No icons are built in; compose the Figma styles. Figma "Date Selection" (‹ value › steppers) has no component: build it from your own buttons if needed.
+
+  | Figma style         | Composition                                                                                                           |
+  | ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+  | Criteria and Result | `<FilterChip label="Status">Done</FilterChip>`                                                                        |
+  | Text Dropdown       | `<FilterChip>All<ChevronDownIcon data-icon="inline-end" /></FilterChip>`                                              |
+  | Dropdown with icon  | `<FilterChip><MapPinIcon data-icon="inline-start" />Hong Kong<ChevronDownIcon data-icon="inline-end" /></FilterChip>` |
+  | Quick key           | `<FilterChip aria-pressed={on} filtered={on}>Today</FilterChip>`                                                      |
+
+- `label` renders as `<Typography variant="label3">`. For other styling, leave `label` out and put your own element in the children.
+- Icon sizes: `inline-start` 24px, `inline-end` 16px (it flips while `aria-expanded`). Gaps follow Figma (8px, 16px before the trailing icon).
+- States: `filtered` = a value is applied; Pressed = held or `aria-expanded`; `disabled` = 30% opacity. Hover / pressed / filtered colors follow [Theme Color](#theme-color); the neutral chip colors are `--chip*` in `src/styles/component.css`.
+- It is only the trigger: wire menus / date pickers around it (it forwards `aria-expanded` etc.).
+
+### Pagination
+
+- `src/components/ui/pagination.tsx` is shadcn's pagination (same parts: `Pagination`, `PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationPrevious`, `PaginationNext`, `PaginationEllipsis`) restyled to the AA Library Figma: 48px round items, current page (`isActive`, `aria-current="page"`) in the theme primary, hover / pressed subtle tints, neutrals `--pagination-*` in `src/styles/component.css`.
+- No built-in text or icons: `Pagination` needs `aria-label`, `PaginationPrevious` / `PaginationNext` need `aria-label` and the icon as children. `PaginationLink` is a `<button>` (`onClick`) or, with `href`, an `<a>`.
+- `getPaginationItems(page, pageCount)`: up to 7 slots (the Figma component has 7 page items) — first and last page, the current page with both neighbours, `…` for gaps: `1 2 3 4 5 … 10`, `1 … 4 5 6 … 10`, `1 … 6 7 8 9 10`; ≤ 7 pages shows all. (Figma's `1 2 … 9 10` example was dropped: it hid the next page.)
+- **Don't run `shadcn add pagination`**: it also overwrites the customised `button.tsx`. Compare with upstream using `--diff` only.
+- `src/components/molecules/pagination-bar.tsx`: `<PaginationBar page total pageSize onPageChange />`. Everything is built in: the page count, the summary (`pagination.summary`, `body2` muted), the page-size chip (`pagination.pageSize`, filtered `FilterChip` + lucide chevron), the navigation labels (`pagination.label` / `previous` / `next`) and arrow icons (lucide). The navigation is left out for a single page (Figma "If only 1 page"). The page-size menu has no design yet, so the chip only shows the current size.
 
 ### Typography
 

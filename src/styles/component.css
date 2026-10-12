@@ -99,3 +99,26 @@
   --chip-border: var(--border);
   --chip-foreground: var(--foreground);
 }
+
+/* Pagination — AA Library Figma "Pagination". Hover / pressed / current use the theme palette
+   (AGENTS.md "Theme Color"); neutrals are the Figma values. */
+@theme inline {
+  --color-pagination-foreground: var(--pagination-foreground);
+  --color-pagination-muted: var(--pagination-muted);
+  --color-pagination-disabled: var(--pagination-disabled);
+}
+
+:root {
+  /* Page numbers */
+  --pagination-foreground: oklch(0.3052 0 0); /* #2F2F2F */
+  /* Previous / next icons and the PaginationBar summary text */
+  --pagination-muted: oklch(0.4819 0 0); /* #5E5E5E */
+  --pagination-disabled: oklch(0.8328 0 0); /* #C8C8C8 */
+}
+
+.dark {
+  /* No dark pagination in Figma: neutral dark tokens. */
+  --pagination-foreground: var(--foreground);
+  --pagination-muted: var(--muted-foreground);
+  --pagination-disabled: oklch(1 0 0 / 25%);
+}
