@@ -1,6 +1,6 @@
 /**
  * Text styles from the AA Library Figma typography spec.
- * Sizes, line heights and weights are defined as `--text-*` tokens in `src/index.css`;
+ * Sizes, line heights and weights are defined as `--text-*` tokens in `src/styles/typography.css`;
  * each name here becomes a `text-<name>` utility.
  */
 export const typographyVariantNames = [

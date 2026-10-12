@@ -6,6 +6,7 @@ import i18n, { LOCALE_STORAGE_KEY, SUPPORTED_LOCALES, type Locale } from '@/i18n
 import { en } from '@/i18n/resources/en';
 import { sc } from '@/i18n/resources/sc';
 import { tc } from '@/i18n/resources/tc';
+import { YStack } from '@/components/ui/stack';
 
 const resources = { sc, tc, en };
 const htmlLang: Record<Locale, string> = { sc: 'zh-CN', tc: 'zh-Hant', en: 'en' };
@@ -13,7 +14,7 @@ const htmlLang: Record<Locale, string> = { sc: 'zh-CN', tc: 'zh-Hant', en: 'en' 
 function Sample() {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col items-center gap-2">
+    <YStack className="gap-2" align="center">
       <Typography variant="heading2" data-testid="title">
         {t('app.title')}
       </Typography>
@@ -21,7 +22,7 @@ function Sample() {
       <Typography variant="subtitle1" data-testid="glyphs">
         骨 直 角 Aa
       </Typography>
-    </div>
+    </YStack>
   );
 }
 

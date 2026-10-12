@@ -1,0 +1,20 @@
+/*
+ * Fonts per language. Latin always uses Noto Sans; CJK prefers the font of the current language,
+ * because Traditional and Simplified Chinese share code points but draw many characters
+ * differently (e.g. 骨 直 角). Not `inline`, so `font-sans` reads the variable at runtime and the
+ * `:lang()` overrides below take effect. <html lang> is set by src/i18n.
+ */
+@theme {
+  --font-sans: 'Noto Sans Variable', 'Noto Sans TC Variable', 'Noto Sans SC Variable', sans-serif;
+}
+
+@layer base {
+  /* zh-Hant / en keep the default stack (TC before SC). */
+  :lang(zh-CN) {
+    --font-sans: 'Noto Sans Variable', 'Noto Sans SC Variable', 'Noto Sans TC Variable', sans-serif;
+  }
+  /* Re-resolve the stack wherever the language changes, e.g. <span lang="zh-Hant"> in a sc page. */
+  [lang] {
+    font-family: var(--font-sans);
+  }
+}

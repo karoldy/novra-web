@@ -32,7 +32,12 @@ src/
 ├── lib/utils.ts      # `cn`, configured with the custom typography sizes
 ├── tokens/           # design tokens (typography variant names)
 ├── i18n/             # i18next setup + resources/{sc,tc,en}.ts
-├── index.css         # Tailwind entry + shadcn theme variables (light/dark)
+├── index.css         # CSS entry: Tailwind, shadcn, then @imports src/styles/*
+├── styles/
+│   ├── theme.css     # shadcn theme: semantic colors (light :root / dark .dark), radius, brand primary
+│   ├── fonts.css     # --font-sans + :lang() font switching
+│   ├── typography.css # typography @theme (--text-heading1 … number3)
+│   └── base.css      # @layer base globals
 ├── App.tsx
 └── main.tsx
 public/               # Static assets served at /
@@ -53,8 +58,8 @@ components.json       # shadcn CLI config
 - Class merging uses `cn` from `@/lib/utils` (backed by the official `cn` package, which replaces `clsx` + `tailwind-merge`). Don't add `clsx` or `tailwind-merge`.
 - **Always import `cn` from `@/lib/utils`, never from `'cn'`** — the local one registers the typography sizes; the bare package treats `text-body1` as a color and drops it next to `text-primary`. ESLint enforces this. The shadcn CLI generates `from 'cn'`: change it after `shadcn add`.
 - Icons: `lucide-react`.
-- Fonts: Noto Sans (Latin), Noto Sans TC, Noto Sans SC — self-hosted Fontsource variable fonts loaded by `unplugin-fonts` (`Unfonts` in `vite.config.ts`, `import 'unfonts.css'` in `src/main.tsx` and `.storybook/preview.tsx`). The `--font-sans` stack in `src/index.css` sets the fallback order. To add a font, install its `@fontsource(-variable)/*` package and list it in `Unfonts`; don't `@import` fonts in CSS. Font files are emitted to `assets/fonts/` and never inlined.
-- Tailwind v4 is configured CSS-first: there is **no `tailwind.config.js`**. Theme tokens and dark mode live in `src/index.css` (`@theme inline`, `:root`, `.dark`). Use theme colors (`bg-primary`, `text-muted-foreground`, …) rather than hardcoded values.
+- Fonts: Noto Sans (Latin), Noto Sans TC, Noto Sans SC — self-hosted Fontsource variable fonts loaded by `unplugin-fonts` (`Unfonts` in `vite.config.ts`, `import 'unfonts.css'` in `src/main.tsx` and `.storybook/preview.tsx`). The `--font-sans` stack in `src/styles/fonts.css` sets the fallback order. To add a font, install its `@fontsource(-variable)/*` package and list it in `Unfonts`; don't `@import` fonts in CSS. Font files are emitted to `assets/fonts/` and never inlined.
+- Tailwind v4 is configured CSS-first: there is **no `tailwind.config.js`**. Theme tokens and dark mode live in `src/styles/theme.css` (`@theme inline`, `:root`, `.dark`); `src/index.css` only imports. The shadcn CLI writes new CSS variables into `src/index.css` (`components.json` → `tailwind.css`): move them into the matching `src/styles/*.css` file. Use theme colors (`bg-primary`, `text-muted-foreground`, …) rather than hardcoded values.
 
 ### Brand / Logo
 
@@ -68,6 +73,18 @@ components.json       # shadcn CLI config
 - `svgr.config.ts` strips the root `width`/`height` (size via className) and rewrites every `id` / `url(#…)` / `href="#…"` to a per-instance `useId()` prefix. Figma exports use fixed mask/clip ids; without this, a hidden copy of the same SVG breaks the visible one.
 - For single-color icons, export from Figma with `fill="currentColor"` so `text-*` sets the color.
 
+### Stack
+
+- Layout with `XStack` (row) / `YStack` (column) from `src/components/ui/stack.tsx` instead of hand-written `flex` containers. Props: `align`, `justify`, `wrap`; spacing goes in `className` (`gap-4`, `p-2`).
+- It renders a `<div>`; change the element with `render`, e.g. `<YStack render={<section />}>` or `<XStack render={<ul />}>`. There is no `as` prop.
+
+### Button
+
+- `src/components/ui/button.tsx` follows the Web Portal Design System (Figma). Only `variant="default"` (navy fill) and `variant="outline"` are designed; `secondary`, `ghost`, `destructive`, `link` and the `icon*` sizes are kept from shadcn because shadcn components use them.
+- Sizes: `lg` = Figma "large" (36px, 12px text), `default` = "Small" (32px, 11px text), `xs` = "Component button" (24px, for use inside other components). `sm` has no Figma counterpart.
+- Icons: put the icon inside with `data-icon="inline-start" | "inline-end"` and no size class (16px by default); the horizontal padding tightens automatically.
+- Colors come from `--button-outline-border`, `--button-outline-foreground`, `--button-disabled`, `--button-disabled-foreground` in `src/styles/theme.css`, not hex values in the component.
+
 ### Typography
 
 - Text styles follow the AA Library Figma spec: `heading1–2`, `subtitle1–3`, `body1–3`, `button1–2`, `icon-button`, `link`, `tab-highlight`, `tab-default`, `input-title`, `input-placeholder`, `label1–3`, `number1–3`.
@@ -75,7 +92,7 @@ components.json       # shadcn CLI config
 - Use `<Typography variant="…">` (`src/components/ui/typography.tsx`) or the matching `text-<variant>` utility. Each utility sets size, line height (120%), letter spacing and weight. Don't use `text-sm`/`text-lg` etc. for app text.
 - Sizes are rem (1rem = 16px) except `number1–3`, which are fixed px per the spec.
 - Headings/subtitles render `h1`–`h5` by default; pass `render={<p />}` etc. to change the tag and keep heading levels sequential (a11y tests fail on skipped levels).
-- To add or change a style, update **both** `src/tokens/typography.ts` (names) and the `@theme` typography block in `src/index.css` (values), then the expectations in `src/stories/typography.stories.tsx`.
+- To add or change a style, update **both** `src/tokens/typography.ts` (names) and `src/styles/typography.css` (values), then the expectations in `src/stories/typography.stories.tsx`.
 - Components in `src/components/ui/` may be edited to fit the project, but keep edits minimal so they can be compared against upstream.
 - ESLint turns off `react-refresh/only-export-components` for `src/components/ui/**`, because shadcn files export variants (e.g. `buttonVariants`) alongside components. Put app components elsewhere so the rule still applies to them.
 
@@ -95,7 +112,7 @@ components.json       # shadcn CLI config
 - Locales (`SUPPORTED_LOCALES`): `sc` (Simplified Chinese, **`DEFAULT_LOCALE`**), `tc` (Traditional Chinese), `en`. The user's choice is saved in `localStorage` (`LOCALE_STORAGE_KEY` = `locale`) and restored on load; if storage is unavailable it falls back to the default.
 - Strings live in `src/i18n/resources/{sc,tc,en}.ts` as nested objects grouped by feature (`app.title`, `locale.label`). `sc` is the source: its shape is `TranslationResource`, which types `t()` keys (`src/i18n/i18next.d.ts`) and the other locales (`export const tc: TranslationResource`), so a missing, extra or misspelled key fails `tsc`.
 - Use `const { t } = useTranslation()`; no hard-coded UI text in components.
-- `<html lang>` follows the locale via `applyDocumentLang` (`sc` → `zh-CN`, `tc` → `zh-Hant`, `en` → `en`). `src/index.css` uses `:lang()` to put the matching CJK font first: SC and TC share code points but draw many characters differently. For mixed content, mark the snippet with `lang="zh-CN"` / `lang="zh-Hant"`.
+- `<html lang>` follows the locale via `applyDocumentLang` (`sc` → `zh-CN`, `tc` → `zh-Hant`, `en` → `en`). `src/styles/fonts.css` uses `:lang()` to put the matching CJK font first: SC and TC share code points but draw many characters differently. For mixed content, mark the snippet with `lang="zh-CN"` / `lang="zh-Hant"`.
 - Storybook has a language switcher in the toolbar; pin a story with `globals: { locale: 'tc' }`.
 
 ## Storybook
@@ -104,6 +121,7 @@ components.json       # shadcn CLI config
 - It reuses `vite.config.ts` (Tailwind plugin, `@/` alias). `.storybook/preview.tsx` imports `src/index.css` so theme tokens apply.
 - Stories live in `src/stories/` (e.g. `src/stories/button.stories.tsx`) and import components via the `@/` alias. Use CSF3 with `satisfies Meta<typeof Component>`.
 - Story titles: `UI/<Name>` for `src/components/ui`, otherwise mirror the folder.
+- Layout inside stories uses `XStack` / `YStack` too, not hand-written `flex` containers.
 - Stories are centered by default (`layout: 'centered'` in `.storybook/preview.tsx`). Use `parameters: { layout: 'fullscreen' }` for page-level stories (layouts, headers, sidebars).
 - Check the a11y panel for new components; fix violations rather than disabling rules.
 

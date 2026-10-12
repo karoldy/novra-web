@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect } from 'storybook/test';
-import { Logo } from '@/components/logo';
+import { Logo } from '@/components/molecules/logo';
+import { XStack, YStack } from '@/components/ui/stack';
 
 const meta = {
   title: 'Brand/Logo',
@@ -33,13 +34,13 @@ export const Vertical: Story = {
 
 export const ColorAndSize: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <YStack className="gap-4" align="start">
       <Logo className="h-10 text-primary" title="primary" />
       <Logo className="h-4 text-muted-foreground" title="muted" />
       <div className="rounded-lg bg-neutral-900 p-4">
         <Logo variant="vertical" className="size-24 text-white" title="on dark" />
       </div>
-    </div>
+    </YStack>
   ),
   play: async ({ canvas }) => {
     const primary = canvas.getByRole('img', { name: 'primary' });
@@ -60,12 +61,12 @@ export const ColorAndSize: Story = {
 // Regression: with shared ids, the visible copy used the hidden copy's masks and lost "CENTRAL".
 export const FirstInstanceHidden: Story = {
   render: () => (
-    <div className="flex gap-4">
+    <XStack className="gap-4">
       <div className="hidden">
         <Logo variant="vertical" className="size-24" title="hidden" />
       </div>
       <Logo variant="vertical" className="size-24" title="visible" />
-    </div>
+    </XStack>
   ),
   play: async ({ canvasElement }) => {
     const [hidden, visible] = canvasElement.querySelectorAll('svg[data-slot=logo]');

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect } from 'storybook/test';
 import { Typography } from '@/components/ui/typography';
 import { typographyVariantNames } from '@/tokens';
+import { XStack, YStack } from '@/components/ui/stack';
 
 const meta = {
   title: 'UI/Typography',
@@ -49,16 +50,16 @@ const spec: Record<(typeof typographyVariantNames)[number], [number, number]> = 
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
+    <YStack className="gap-4">
       {typographyVariantNames.map((variant) => (
-        <div key={variant} className="flex items-baseline gap-6">
+        <XStack key={variant} className="gap-6" align="baseline">
           <span className="w-40 shrink-0 text-xs text-muted-foreground">{variant}</span>
           <Typography variant={variant} data-testid={variant}>
             Almost before we knew it 你現在閱讀的
           </Typography>
-        </div>
+        </XStack>
       ))}
-    </div>
+    </YStack>
   ),
   play: async ({ canvas }) => {
     for (const variant of typographyVariantNames) {
@@ -74,18 +75,18 @@ export const AllVariants: Story = {
 // Figma "Highlight" styles: same variant with weight="semibold".
 export const Highlight: Story = {
   render: () => (
-    <div className="flex flex-col gap-2">
+    <YStack className="gap-2">
       {(['body1', 'body2', 'body3'] as const).map((variant) => (
-        <div key={variant} className="flex gap-6">
+        <XStack key={variant} className="gap-6">
           <Typography variant={variant} data-testid={variant}>
             {variant}
           </Typography>
           <Typography variant={variant} weight="semibold" data-testid={`${variant}-highlight`}>
             {variant} highlight
           </Typography>
-        </div>
+        </XStack>
       ))}
-    </div>
+    </YStack>
   ),
   play: async ({ canvas }) => {
     for (const [variant, size] of [
@@ -103,7 +104,7 @@ export const Highlight: Story = {
 
 export const SemanticTags: Story = {
   render: () => (
-    <div className="flex flex-col gap-2">
+    <YStack className="gap-2">
       <Typography variant="heading1">Heading 1</Typography>
       <Typography variant="heading2">Heading 2</Typography>
       <Typography variant="subtitle1">Subtitle 1</Typography>
@@ -111,7 +112,7 @@ export const SemanticTags: Story = {
         Subtitle 2 rendered as p
       </Typography>
       <Typography variant="body1">Body 1</Typography>
-    </div>
+    </YStack>
   ),
   play: async ({ canvas }) => {
     await expect(canvas.getByText('Heading 1').tagName).toBe('H1');
