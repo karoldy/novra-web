@@ -5,6 +5,7 @@
 @import './styles/typography.css';
 @import './styles/fonts.css';
 @import './styles/theme.css';
+@import './styles/component.css';
 @import './styles/base.css';
 
 @custom-variant dark (&:is(.dark *));

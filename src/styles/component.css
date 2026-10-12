@@ -1,0 +1,101 @@
+/*
+ * Component tokens: colors owned by one component, mapped to Tailwind utilities
+ * (`bg-button-primary`, `stroke-spinner-indicator`, `bg-chip`, …). Global theme colors live in
+ * theme.css; these build on them (e.g. --button-primary = --primary).
+ */
+
+/* Button — AA Library Figma layout. The blue (#094DCC) family is replaced by the theme primary
+   #0F1048; hover / pressed / subtle tints are derived from it (AGENTS.md "Theme Color").
+   Danger, disabled and skeleton are the Figma values. */
+@theme inline {
+  --color-button-primary: var(--button-primary);
+  --color-button-primary-hover: var(--button-primary-hover);
+  --color-button-primary-pressed: var(--button-primary-pressed);
+  --color-button-primary-foreground: var(--button-primary-foreground);
+  --color-button-accent: var(--button-accent);
+  --color-button-subtle-hover: var(--button-subtle-hover);
+  --color-button-subtle-pressed: var(--button-subtle-pressed);
+  --color-button-subtle-foreground: var(--button-subtle-foreground);
+  --color-button-danger: var(--button-danger);
+  --color-button-danger-hover: var(--button-danger-hover);
+  --color-button-danger-pressed: var(--button-danger-pressed);
+  --color-button-danger-subtle-hover: var(--button-danger-subtle-hover);
+  --color-button-danger-subtle-pressed: var(--button-danger-subtle-pressed);
+  --color-button-disabled: var(--button-disabled);
+  --color-button-disabled-foreground: var(--button-disabled-foreground);
+  --color-button-skeleton: var(--button-skeleton);
+}
+
+:root {
+  --button-primary: var(--primary);
+  --button-primary-hover: oklch(0.3 0.12 273.57); /* #1E2368, lighter: navy can't get darker */
+  --button-primary-pressed: oklch(0.36 0.13 273.57); /* #2A3280 */
+  --button-primary-foreground: var(--primary-foreground);
+  /* Text/border of outline + ghost. White on dark surfaces (Figma "On White=no", `onDark`). */
+  --button-accent: var(--button-primary);
+  --button-subtle-hover: oklch(0.9442 0.0264 273.57); /* #E7ECFF */
+  --button-subtle-pressed: oklch(0.8457 0.0759 273.57); /* #BCCAFF */
+  /* Text/border on the subtle backgrounds: always navy, they stay light in dark mode too. */
+  --button-subtle-foreground: oklch(0.2199 0.101 273.57); /* #0F1048 */
+  --button-danger: oklch(0.5775 0.228 27.52); /* #E1151C */
+  --button-danger-hover: oklch(0.547 0.2151 27.32); /* #D1141B */
+  --button-danger-pressed: oklch(0.4778 0.187 27.15); /* #AE1016 */
+  --button-danger-subtle-hover: oklch(0.947 0.0219 17.55); /* #FCE8E8 */
+  --button-danger-subtle-pressed: oklch(0.8419 0.0708 16.49); /* #F6B9BB */
+  --button-disabled: oklch(0.9521 0 0); /* #EFEFEF */
+  --button-disabled-foreground: oklch(0.8328 0 0); /* #C8C8C8 */
+  --button-skeleton: oklch(0.9761 0 0); /* #F7F7F7 */
+}
+
+.dark {
+  /* Dark mode: primary is the light tint, so hover / pressed step darker; outline / ghost text
+     is white (as "On White=no"). */
+  --button-primary: var(--primary);
+  --button-primary-hover: oklch(0.76 0.08 273.57);
+  --button-primary-pressed: oklch(0.7 0.09 273.57);
+  --button-primary-foreground: var(--primary-foreground);
+  --button-accent: oklch(1 0 0);
+  /* Figma's light grays would glare on a dark page: use the neutral dark tokens. */
+  --button-disabled: var(--muted);
+  --button-disabled-foreground: var(--muted-foreground);
+  --button-skeleton: var(--muted);
+}
+
+/* Spinner — AA Library Figma "Loading" */
+@theme inline {
+  --color-spinner-indicator: var(--spinner-indicator);
+  --color-spinner-track: var(--spinner-track);
+}
+
+:root {
+  --spinner-indicator: var(--button-primary);
+  --spinner-track: oklch(0.9521 0 0); /* #EFEFEF */
+}
+
+.dark {
+  --spinner-track: oklch(1 0 0 / 15%);
+}
+
+/* Filter chip — AA Library Figma "Chips/Filter". Hover / pressed reuse --button-primary-*. */
+@theme inline {
+  --color-chip: var(--chip);
+  --color-chip-border: var(--chip-border);
+  --color-chip-foreground: var(--chip-foreground);
+  --color-chip-filtered: var(--chip-filtered);
+  --color-chip-filtered-foreground: var(--chip-filtered-foreground);
+}
+
+:root {
+  --chip: oklch(0.9761 0 0); /* #F7F7F7 */
+  --chip-border: oklch(0.8328 0 0); /* #C8C8C8 */
+  --chip-foreground: oklch(0.3052 0 0); /* #2F2F2F */
+  --chip-filtered: var(--button-subtle-hover); /* #E7ECFF (Figma #E6ECFF, theme hue) */
+  --chip-filtered-foreground: var(--button-subtle-foreground); /* #0F1048 (Figma #094DCC) */
+}
+
+.dark {
+  /* No dark chips in Figma: neutral dark tokens; filtered stays light with navy text. */
+  --chip: var(--muted);
+  --chip-border: var(--border);
+  --chip-foreground: var(--foreground);
+}

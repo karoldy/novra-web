@@ -1,4 +1,5 @@
-/* shadcn theme: semantic colors, radius and their Tailwind mappings (light :root, dark .dark). */
+/* Global shadcn theme: semantic colors, radius and their Tailwind mappings (light :root, dark .dark).
+   Component-owned variables (--button-*, --spinner-*, --chip*) are in component.css. */
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -27,10 +28,6 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  --color-button-outline-border: var(--button-outline-border);
-  --color-button-outline-foreground: var(--button-outline-foreground);
-  --color-button-disabled: var(--button-disabled);
-  --color-button-disabled-foreground: var(--button-disabled-foreground);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -80,11 +77,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.2199 0.101 273.57);
-  /* Button (Web Portal Design System, Figma) */
-  --button-outline-border: oklch(0.9402 0.0119 313.21); /* #EEE9F1 */
-  --button-outline-foreground: oklch(0.401 0.0356 297.87); /* #4A4459 */
-  --button-disabled: oklch(0.9698 0.0057 264.53); /* #F3F5F9 */
-  --button-disabled-foreground: oklch(0.9006 0 0); /* #DEDEDE */
 }
 
 /* The brand navy is invisible on a dark background (1.1:1), so dark mode uses a light tint of
@@ -121,9 +113,4 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.82 0.07 273.57);
-  /* No dark values in Figma: reuse the neutral dark tokens. */
-  --button-outline-border: var(--border);
-  --button-outline-foreground: var(--foreground);
-  --button-disabled: var(--muted);
-  --button-disabled-foreground: var(--muted-foreground);
 }
