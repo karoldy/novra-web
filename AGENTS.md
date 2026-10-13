@@ -29,8 +29,8 @@ pnpm test:watch       # Vitest watch mode
 ```
 src/
 ├── components/
-│   ├── ui/           # atoms: shadcn components + base primitives (Button, Typography, Stack, Spinner, Pagination)
-│   ├── molecules/    # small compositions of atoms (Logo, FilterChip, PaginationBar)
+│   ├── ui/           # atoms: shadcn components + base primitives (Button, Typography, Stack, Spinner, Pagination, Table)
+│   ├── molecules/    # small compositions of atoms (Logo, FilterChip, PaginationBar, DataTable)
 │   └── organisms/    # larger sections built from molecules/atoms (headers, sidebars, forms)
 ├── lib/utils.ts      # `cn`, configured with the custom typography sizes
 ├── tokens/           # design tokens (typography variant names)
@@ -149,6 +149,16 @@ components.json       # shadcn CLI config
 - `getPaginationItems(page, pageCount)`: up to 7 slots (the Figma component has 7 page items) — first and last page, the current page with both neighbours, `…` for gaps: `1 2 3 4 5 … 10`, `1 … 4 5 6 … 10`, `1 … 6 7 8 9 10`; ≤ 7 pages shows all. (Figma's `1 2 … 9 10` example was dropped: it hid the next page.)
 - **Don't run `shadcn add pagination`**: it also overwrites the customised `button.tsx`. Compare with upstream using `--diff` only.
 - `src/components/molecules/pagination-bar.tsx`: `<PaginationBar page total pageSize onPageChange />`. Everything is built in: the page count, the summary (`pagination.summary`, `body2` muted), the page-size chip (`pagination.pageSize`, filtered `FilterChip` + lucide chevron), the navigation labels (`pagination.label` / `previous` / `next`) and arrow icons (lucide). The navigation is left out for a single page (Figma "If only 1 page"). The page-size menu has no design yet, so the chip only shows the current size.
+
+### Table
+
+- `src/components/ui/table.tsx` is the AA Library Figma "Table" markup: `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`. Rows are 63px, 4px radius, `text-body2`, padding 24×16. Colors are `--table-*` in `src/styles/component.css`.
+- The sort icon and the row arrow are built in, both lucide: `TableSortButton` (`direction` `asc` | `desc` | `false`, chevron 16px before the label) and `TableRowArrow`. Labels stay with the caller.
+- `pin="start" | "end"` on `TableHead` / `TableCell` sticks that cell. `edge` draws the divider on the end-pinned column next to the scrolling cells. Sticky offsets are the caller's (`style`).
+- `src/components/molecules/data-table.tsx`: `<DataTable columns data aria-label />`, built on `@tanstack/react-table` v9 (`useTable`). Define columns with `createDataTableColumns<T>()` from `data-table-columns.ts`.
+- Sortable headers use `TableSortButton`. `aria-sort` is `none` / `ascending` / `descending`. A column opts out with `enableSorting: false`. Sorting is client-side unless `manualSorting`. `sorting` / `onSortingChange` control it.
+- Pin a column with `meta: { pin: 'start' | 'end' }`. Omit `pin` and the column scrolls. `start` sticks to the inline start, `end` to the inline end; the end column next to the scrolling cells gets the divider. Set `meta.width` or `size` (px) on pinned and wide columns so the sticky offsets match. A column with neither shares the leftover width (`meta.flex`, default 1, floor `meta.minWidth` or 120). `meta.align: 'center'` centers a cell (headers stay at the start). Plain cell text clamps to two lines.
+- `defaultPageSize` (or controlled `pagination`) slices the rows and renders `PaginationBar` with `page`, `total`, `pageSize`, `onPageChange`. The page-size chip only displays the current size. `label` is the bar's landmark name. `manualPagination` and `rowCount` are for a server page. `loading` shows skeleton rows; `empty` fills one row when there is no data; `onRowClick` makes a row a click and Enter target.
 
 ### Typography
 

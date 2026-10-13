@@ -122,3 +122,35 @@
   --pagination-muted: var(--muted-foreground);
   --pagination-disabled: oklch(1 0 0 / 25%);
 }
+
+/* Table — AA Library Figma "Table". Header text is the description gray; rows are the
+   page-blue strip. The pin rule is a divider, not the brand primary. */
+@theme inline {
+  --color-table-foreground: var(--table-foreground);
+  --color-table-header: var(--table-header);
+  --color-table-row: var(--table-row);
+  --color-table-pin: var(--table-pin);
+  --color-table-pin-header: var(--table-pin-header);
+}
+
+:root {
+  /* Cell text */
+  --table-foreground: oklch(0.3052 0 0); /* #2F2F2F */
+  /* Column titles. Figma #919191 is 3.3:1 on white, under 4.5:1 at body2,
+     so this uses the theme muted foreground instead. */
+  --table-header: var(--muted-foreground);
+  /* Body row fill */
+  --table-row: oklch(0.982 0.008 236); /* #F5F9FD */
+  /* Divider on the end-pinned column, beside the scrolling cells */
+  --table-pin: oklch(0.754 0.055 243); /* #90B3D5 */
+  --table-pin-header: oklch(0.8328 0 0); /* #C8C8C8 */
+}
+
+.dark {
+  /* No dark table in Figma: neutral dark tokens. */
+  --table-foreground: var(--foreground);
+  --table-header: var(--muted-foreground);
+  --table-row: var(--muted);
+  --table-pin: var(--border);
+  --table-pin-header: var(--border);
+}
